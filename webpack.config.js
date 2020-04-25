@@ -7,10 +7,12 @@ module.exports = {
     publicPath: "/",
     filename: "index.js",
   },
+  devtool: "inline-source-map",
   devServer: {
     contentBase: "./build",
     open: true,
     port: 3000,
+    stats: "errors-warnings",
   },
   module: {
     rules: [

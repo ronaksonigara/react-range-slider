@@ -8,14 +8,7 @@ const App = () => {
   };
   return (
     <>
-      <div>React App</div>
-      <RangeSlider
-        onChange={handleChange}
-        min={20}
-        max={150}
-        label="range slider"
-        value={25}
-      />
+      <RangeSlider onChange={handleChange} />
     </>
   );
 };

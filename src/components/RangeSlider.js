@@ -19,6 +19,8 @@ const SliderContainer = styled(SliderWrapper)`
 const Slider = styled.div`
   position: relative;
   height: 16px;
+  flex-grow: 1;
+  margin-right: 10px;
 `;
 
 const SliderBar = styled.div`
@@ -66,15 +68,6 @@ const SliderInput = styled.input`
       box-shadow: ${(props) =>
         props.disabled ? "none" : "0 0 0 5px rgba(24, 255, 144, 0.12)"};
     }
-    &:before: {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      display: inine-block;
-      height: 5px;
-      background: black;
-    }
   }
 `;
 
@@ -97,6 +90,36 @@ const InputNumber = styled.input.attrs((props) => ({
   type: "number",
 }))``;
 
+const SliderBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const SliderToolTip = styled.span`
+  display: inline-block;
+  position: relative;
+  border: 1px solid #0f9d58;
+  padding: 3px;
+  font-size: 12px;
+  line-height: 12px;
+  border-radius: 5px;
+  width: 50px;
+  flex-shrink: 0;
+  &:before {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-right: 1px solid #0f9d58;
+    border-top: 1px solid #0f9d58;
+    right: 100%;
+    top: 50%;
+    transform: rotate(-135deg) translateY(50%);
+  }
+`;
+
 const propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.number,
@@ -104,12 +127,13 @@ const propTypes = {
   max: PropTypes.number,
   step: PropTypes.number,
   helperText: PropTypes.string,
-  validateStatus: PropTypes.oneOf(["error", ""]),
+  isError: PropTypes.bool,
   showTooltip: PropTypes.bool,
   label: PropTypes.string,
   id: PropTypes.string,
   name: PropTypes.string,
   disabled: PropTypes.bool,
+  showInput: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -118,9 +142,10 @@ const defaultProps = {
   max: 100,
   step: 1,
   showTooltip: true,
+  showInput: false,
   disabled: false,
   helperText: "",
-  validateStatus: "",
+  isError: false,
 };
 
 const calculateValue = (value, min, max) => {
@@ -134,11 +159,10 @@ const calculateValue = (value, min, max) => {
 };
 
 const calculatePercent = (value, min, max) => {
-  if (value === min) {
+  if (value < min) {
     return 0;
-  } else {
-    return parseInt((value / (max - min)) * 100);
   }
+  return ((value - min) / (max - min)) * 100;
 };
 
 const RangeSlider = (props) => {
@@ -149,11 +173,12 @@ const RangeSlider = (props) => {
     max,
     step,
     helperText,
-    validateStatus,
+    isError,
     showTooltip,
     label,
     id,
     disabled,
+    showInput,
     ...otherProps
   } = props;
   const tempVaue = calculateValue(value, min, max);
@@ -165,13 +190,19 @@ const RangeSlider = (props) => {
     if (value > max || value < min) {
       setError(`Enter value between ${min} - ${max}`);
     } else {
-      setCurentValue(Number(value));
       if (Boolean(inputError)) {
         setError("");
       }
       if (onChange) {
         onChange(value);
       }
+    }
+    setCurentValue(Number(value));
+  };
+
+  const handleFocus = () => {
+    if (Boolean(inputError)) {
+      setError("");
     }
   };
 
@@ -182,16 +213,24 @@ const RangeSlider = (props) => {
           {child1}
           {child2}
         </SliderContainer>
-        <InputNumber value={currentValue} disabled />
+        {showInput && (
+          <>
+            <InputNumber
+              onChange={handleChange}
+              onFocus={handleFocus}
+              value={Boolean(currentValue) ? currentValue : ""}
+              disabled={disabled}
+            />
+            <HelperText error={true}>{inputError}</HelperText>
+          </>
+        )}
       </Container>
     );
   };
 
   const renderHelper = () => {
     if (helperText) {
-      return (
-        <HelperText error={validateStatus === "error"}>{helperText}</HelperText>
-      );
+      return <HelperText error={isError}>{helperText}</HelperText>;
     }
 
     return null;
@@ -201,30 +240,36 @@ const RangeSlider = (props) => {
     return (
       <SliderWrapper>
         {label && (
-          <Label error={validateStatus === "error"} htmlFor={id}>
+          <Label error={isError} htmlFor={id}>
             {label}
           </Label>
         )}
-
-        <Slider>
-          <SliderBar>
-            <SliderBarFill
+        <SliderBox>
+          <Slider>
+            <SliderBar>
+              <SliderBarFill
+                disabled={disabled}
+                value={calculatePercent(currentValue, min, max)}
+              />
+            </SliderBar>
+            <SliderInput
+              id={id}
               disabled={disabled}
-              value={calculatePercent(currentValue, min, max)}
+              type="range"
+              step={step}
+              min={min}
+              max={max}
+              value={currentValue}
+              onChange={handleChange}
+              {...otherProps}
             />
-          </SliderBar>
-          <SliderInput
-            id={id}
-            disabled={disabled}
-            type="range"
-            step={step}
-            min={min}
-            max={max}
-            value={currentValue}
-            onChange={handleChange}
-            {...otherProps}
-          />
-        </Slider>
+          </Slider>
+          {showTooltip && (
+            <SliderToolTip value={calculatePercent(currentValue, min, max)}>
+              {calculateValue(currentValue, min, max)}
+            </SliderToolTip>
+          )}
+        </SliderBox>
       </SliderWrapper>
     );
   };

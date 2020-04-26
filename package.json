@@ -6,11 +6,15 @@
   "scripts": {
     "start": "webpack-dev-server --mode development",
     "build": "webpack --mode production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "storybook": "start-storybook -p 6006",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-storybook": "build-storybook",
+    "deploy-storybook": "storybook-to-ghpages"
   },
   "author": "Ronak Sonigara",
   "license": "ISC",
   "dependencies": {
+    "@storybook/addon-knobs": "^5.3.18",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "styled-components": "^5.1.0"
@@ -19,6 +23,11 @@
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
+    "@storybook/addon-actions": "^5.3.18",
+    "@storybook/addon-links": "^5.3.18",
+    "@storybook/addons": "^5.3.18",
+    "@storybook/react": "^5.3.18",
+    "@storybook/storybook-deployer": "^2.8.5",
     "babel-loader": "^8.1.0",
     "babel-plugin-styled-components": "^1.10.7",
     "css-loader": "^3.5.3",
